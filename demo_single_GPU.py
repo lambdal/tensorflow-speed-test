@@ -12,7 +12,8 @@ import tensorflow as tf
 BATCH_SIZE = 32
 NUM_CLASSES = 1000
 
-NUM_ITER = 100
+NUM_WARMUP = 50
+NUM_ITER = 200
 
 x = np.random.rand(BATCH_SIZE, 224, 224, 3)
 y = np.random.randint(NUM_CLASSES, size=(BATCH_SIZE))
@@ -48,13 +49,21 @@ optimizer = tf.train.MomentumOptimizer(
     learning_rate=0.001,
     momentum=0.9)
 
-minimize_op = optimizer.minimize(loss)
+grads_and_vars = optimizer.compute_gradients(loss)
+minimize_op = optimizer.apply_gradients(
+  grads_and_vars)
 
 with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
 
+  print("Warm up finished.")
+  for i_iter in range(NUM_WARMUP):
+    _loss = sess.run(minimize_op, feed_dict={image: x, label: y})
+  print("Warm up finished.")
+
   start_time = time.time()
-  for iter in range(NUM_ITER):
+  for i_iter in range(NUM_ITER):
+    print(i_iter)
     _loss = sess.run(minimize_op, feed_dict={image: x, label: y})
   end_time = time.time()
 
