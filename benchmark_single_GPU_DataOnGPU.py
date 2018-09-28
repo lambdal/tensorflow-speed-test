@@ -1,6 +1,6 @@
 """
-Reference performance on Titan X
-Average Speed: 434.87 images/sec.
+Reference performance on 1080 TI
+
 
 """
 from __future__ import print_function
@@ -45,10 +45,17 @@ def main():
   y = np.random.randint(config.num_classes, size=(config.batch_size))
 
   with tf.device("/gpu:{}".format(config.device_id)):
-    image = tf.placeholder(
-      tf.float32, shape=(config.batch_size, 224, 224, 3))
-    label = tf.placeholder(
-      tf.int32, shape=(config.batch_size))
+    # image = tf.placeholder(
+    #   tf.float32, shape=(config.batch_size, 224, 224, 3))
+    # label = tf.placeholder(
+    #   tf.int32, shape=(config.batch_size))
+
+    image = tf.constant(1.0,
+                        shape=[config.batch_size, 224, 224, 3],
+                        dtype=tf.float32)
+    label = tf.constant(1,
+                        shape=[config.batch_size],
+                        dtype=tf.int32)
 
     outputs = net.simple_net(image, config.batch_size, config.num_classes)
 
@@ -76,13 +83,15 @@ def main():
 
     print("Warm up started.")
     for i_iter in range(config.num_warmup):
-      sess.run(minimize_op, feed_dict={image: x, label: y})
+      # sess.run(minimize_op, feed_dict={image: x, label: y})
+      sess.run(minimize_op)
     print("Warm up finished.")
 
     start_time = time.time()
     for i_iter in range(config.num_iterations):
       print("\rIteration: " + str(i_iter), end="")
-      sess.run(minimize_op, feed_dict={image: x, label: y})
+      # sess.run(minimize_op, feed_dict={image: x, label: y})
+      sess.run(minimize_op)
       sys.stdout.flush()
     end_time = time.time()
 

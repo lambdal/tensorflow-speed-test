@@ -1,11 +1,13 @@
 """
-Reference performance on Titan X
-Average Speed: 434.87 images/sec.
+Reference performance on 1080 TI
+1 GPU:
+2 GPU:
+3 GPU:
+4 GPU:
 
 """
 from __future__ import print_function
 import time
-import numpy as np
 import argparse
 import sys
 
@@ -107,15 +109,7 @@ def main():
   config.list_devices = list(map(int, config.list_devices.split(",")))
   config.gpu_count = len(config.list_devices)
 
-  x = np.random.rand(config.gpu_count * config.batch_size_per_gpu, 224, 224, 3)
-  y = np.random.randint(config.num_classes,
-                        size=(config.gpu_count * config.batch_size_per_gpu))
-
   with tf.device("/cpu:0"):
-    image = tf.placeholder(
-      tf.float32, shape=(config.gpu_count * config.batch_size_per_gpu, 224, 224, 3))
-    label = tf.placeholder(
-      tf.int32, shape=(config.gpu_count * config.batch_size_per_gpu))
 
     list_grads_and_vars = []
 
@@ -124,17 +118,19 @@ def main():
       with tf.device(assign_to_device("/gpu:{}".format(device_id),
                      ps_device="/cpu:0")):
 
-        # Split input data across multiple devices
-        images_batch, lables_batch = batch_split((image, label),
-                                                 split_id,
-                                                 config.batch_size_per_gpu)
+        images_batch = tf.constant(1.0,
+                                   shape=[config.batch_size_per_gpu, 224, 224, 3],
+                                   dtype=tf.float32)
+        labels_batch = tf.constant(1,
+                                   shape=[config.batch_size_per_gpu],
+                                   dtype=tf.int32)
 
         outputs = net.simple_net(images_batch,
                                  config.batch_size_per_gpu,
                                  config.num_classes)
 
         loss = tf.losses.sparse_softmax_cross_entropy(
-          labels=lables_batch, logits=outputs)
+          labels=labels_batch, logits=outputs)
 
         optimizer = tf.train.MomentumOptimizer(
             learning_rate=0.001,
@@ -159,14 +155,14 @@ def main():
 
     print("Warm up started.")
     for i_iter in range(config.num_warmup):
-      sess.run(minimize_op, feed_dict={image: x, label: y})
+      sess.run(minimize_op)
     print("Warm up finished.")
 
     start_time = time.time()
     for i_iter in range(config.num_iterations):
       print("\rIteration: " + str(i_iter), end="")
       sys.stdout.flush()
-      sess.run(minimize_op, feed_dict={image: x, label: y})
+      sess.run(minimize_op)
     end_time = time.time()
 
     total_time = end_time - start_time
