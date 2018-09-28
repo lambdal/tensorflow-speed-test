@@ -50,10 +50,10 @@ def main():
     label = tf.placeholder(
       tf.int32, shape=(config.batch_size))
 
-    output = net.simple_net(image, config.batch_size, config.num_classes)
+    outputs = net.simple_net(image, config.batch_size, config.num_classes)
 
-    loss = tf.losses.softmax_cross_entropy(
-      logits=output, onehot_labels=tf.one_hot(label, config.num_classes))
+    loss = tf.losses.sparse_softmax_cross_entropy(
+      labels=label, logits=outputs)
 
     optimizer = tf.train.MomentumOptimizer(
         learning_rate=0.001,
@@ -74,7 +74,7 @@ def main():
   with tf.Session(config=session_config) as sess:
     sess.run(tf.global_variables_initializer())
 
-    print("Warm up finished.")
+    print("Warm up started.")
     for i_iter in range(config.num_warmup):
       sess.run(minimize_op, feed_dict={image: x, label: y})
     print("Warm up finished.")

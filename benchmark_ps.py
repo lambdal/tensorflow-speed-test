@@ -133,9 +133,8 @@ def main():
                                  config.batch_size_per_gpu,
                                  config.num_classes)
 
-        loss = tf.losses.softmax_cross_entropy(
-          logits=outputs,
-          onehot_labels=tf.one_hot(lables_batch, config.num_classes))
+        loss = tf.losses.sparse_softmax_cross_entropy(
+          labels=label, logits=outputs)
 
         optimizer = tf.train.MomentumOptimizer(
             learning_rate=0.001,
