@@ -1,7 +1,6 @@
 """
 Reference performance on 1080 TI
 
-
 """
 from __future__ import print_function
 import time
@@ -12,6 +11,28 @@ import sys
 import tensorflow as tf
 
 import net
+
+ps_ops = ["Variable", "VariableV2", "AutoReloadVariable"]
+
+
+def assign_to_device(device, ps_device="/cpu:0"):
+    def _assign(op):
+        node_def = op if isinstance(op, tf.NodeDef) else op.node_def
+        if node_def.op in ps_ops:
+            return ps_device
+        else:
+            return device
+    return _assign
+
+
+def input_fn(x, y, batch_size):
+  dataset = tf.data.Dataset.from_tensor_slices((x, y))
+  dataset = dataset.repeat(1000)
+  dataset = dataset.apply(
+      tf.contrib.data.batch_and_drop_remainder(batch_size))
+  dataset = dataset.prefetch(16)
+  iterator = dataset.make_one_shot_iterator()
+  return iterator.get_next() 
 
 
 def main():
@@ -39,20 +60,30 @@ def main():
                       help="Number of benchmark iterations.",
                       type=int,
                       default=200)
+  parser.add_argument("--num_samples",
+                      help="Number of samples in the dataset.",
+                      type=int,
+                      default=128)
   config = parser.parse_args()
 
-  with tf.device("/gpu:{}".format(config.device_id)):
-    image = tf.constant(1.0,
-                        shape=[config.batch_size, 224, 224, 3],
-                        dtype=tf.float32)
-    label = tf.constant(1,
-                        shape=[config.batch_size],
-                        dtype=tf.int32)
+  x = np.random.rand(config.num_samples, 224, 224, 3).astype('f')
+  y = np.random.randint(config.num_classes, size=(config.num_samples))
 
-    outputs = net.simple_net(image, config.batch_size, config.num_classes)
+  with tf.device("/cpu:0"):
+    batch = input_fn(x, y, config.batch_size)
+
+    image = tf.placeholder(
+      tf.float32, shape=(config.batch_size, 224, 224, 3))
+    label = tf.placeholder(
+      tf.int32, shape=(config.batch_size))
+
+  with tf.device(assign_to_device("/gpu:{}".format(config.device_id),
+                                  ps_device="/cpu:0")):
+
+    outputs = net.simple_net(batch[0], config.batch_size, config.num_classes)
 
     loss = tf.losses.sparse_softmax_cross_entropy(
-      labels=label, logits=outputs)
+      labels=batch[1], logits=outputs)
 
     optimizer = tf.train.MomentumOptimizer(
         learning_rate=0.001,

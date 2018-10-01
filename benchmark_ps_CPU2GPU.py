@@ -26,7 +26,7 @@ def assign_to_device(device, ps_device="/cpu:0"):
     def _assign(op):
         node_def = op if isinstance(op, tf.NodeDef) else op.node_def
         if node_def.op in ps_ops:
-            return "/" + ps_device
+            return ps_device
         else:
             return device
     return _assign
@@ -121,37 +121,37 @@ def main():
     label = tf.placeholder(
       tf.int32, shape=(config.gpu_count * config.batch_size_per_gpu))
 
-    list_grads_and_vars = []
+  list_grads_and_vars = []
 
-    # Map
-    for split_id, device_id in enumerate(config.list_devices):
-      with tf.device(assign_to_device("/gpu:{}".format(device_id),
-                     ps_device="/cpu:0")):
+  # Map
+  for split_id, device_id in enumerate(config.list_devices):
+    with tf.device(assign_to_device("/gpu:{}".format(device_id),
+                   ps_device="/cpu:0")):
 
-        # Split input data across multiple devices
-        images_batch, lables_batch = batch_split((image, label),
-                                                 split_id,
-                                                 config.batch_size_per_gpu)
+      # Split input data across multiple devices
+      images_batch, lables_batch = batch_split((image, label),
+                                               split_id,
+                                               config.batch_size_per_gpu)
 
-        outputs = net.simple_net(images_batch,
-                                 config.batch_size_per_gpu,
-                                 config.num_classes)
+      outputs = net.simple_net(images_batch,
+                               config.batch_size_per_gpu,
+                               config.num_classes)
 
-        loss = tf.losses.sparse_softmax_cross_entropy(
-          labels=lables_batch, logits=outputs)
+      loss = tf.losses.sparse_softmax_cross_entropy(
+        labels=lables_batch, logits=outputs)
 
-        optimizer = tf.train.MomentumOptimizer(
-            learning_rate=0.001,
-            momentum=0.9)
+      optimizer = tf.train.MomentumOptimizer(
+          learning_rate=0.001,
+          momentum=0.9)
 
-        list_grads_and_vars.append(optimizer.compute_gradients(loss))
+      list_grads_and_vars.append(optimizer.compute_gradients(loss))
 
-    ave_grads_and_vars = average_gradients(list_grads_and_vars)
+  ave_grads_and_vars = average_gradients(list_grads_and_vars)
 
-    minimize_op = optimizer.apply_gradients(ave_grads_and_vars)
+  minimize_op = optimizer.apply_gradients(ave_grads_and_vars)
 
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.90,
-                                allow_growth=True)
+  gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.90,
+                              allow_growth=True)
 
   session_config = tf.ConfigProto(
     allow_soft_placement=False,
