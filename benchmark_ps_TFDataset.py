@@ -49,20 +49,22 @@ def main():
                       help="Number of benchmark iterations.",
                       type=int,
                       default=200)
+  parser.add_argument("--num_samples",
+                      help="Number of samples in the dataset.",
+                      type=int,
+                      default=128)
   config = parser.parse_args()
 
   config.device_list = list(map(int, config.device_list.split(",")))
   config.gpu_count = len(config.device_list)
 
-  x = np.random.rand(config.gpu_count * config.batch_size_per_gpu, 224, 224, 3)
+  x = np.random.rand(
+    config.gpu_count * config.batch_size_per_gpu, 224, 224, 3).astype("f")
   y = np.random.randint(config.num_classes,
                         size=(config.gpu_count * config.batch_size_per_gpu))
 
   with tf.device("/cpu:0"):
-    image = tf.placeholder(
-      tf.float32, shape=(config.gpu_count * config.batch_size_per_gpu, 224, 224, 3))
-    label = tf.placeholder(
-      tf.int32, shape=(config.gpu_count * config.batch_size_per_gpu))
+    batch = net.input_fn(x, y, config.gpu_count * config.batch_size_per_gpu)
 
   list_grads_and_vars = []
 
@@ -72,7 +74,7 @@ def main():
                    ps_device="/cpu:0")):
 
       # Split input data across multiple devices
-      images_batch, lables_batch = utils.batch_split((image, label),
+      images_batch, lables_batch = utils.batch_split(batch,
                                                      split_id,
                                                      config.batch_size_per_gpu)
 
@@ -106,14 +108,14 @@ def main():
 
     print("Warm up started.")
     for i_iter in range(config.num_warmup):
-      sess.run(minimize_op, feed_dict={image: x, label: y})
+      sess.run(minimize_op)
     print("Warm up finished.")
 
     start_time = time.time()
     for i_iter in range(config.num_iterations):
       print("\rIteration: " + str(i_iter), end="")
       sys.stdout.flush()
-      sess.run(minimize_op, feed_dict={image: x, label: y})
+      sess.run(minimize_op)
     end_time = time.time()
 
     total_time = end_time - start_time

@@ -1,13 +1,18 @@
 """
 Reference performance on 1080 TI
 
-
 """
 from __future__ import print_function
 import time
 import numpy as np
 import argparse
 import sys
+
+# By default CUDA guesses which device is fastest using a simple heuristic,
+# and make that device 0. This is difficult to debug. We use PCI_BUS_ID
+# instead to orders devices by PCI bus ID in ascending order.
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
 import tensorflow as tf
 
@@ -39,15 +44,21 @@ def main():
                       help="Number of benchmark iterations.",
                       type=int,
                       default=200)
+  parser.add_argument("--num_samples",
+                      help="Number of samples in the dataset.",
+                      type=int,
+                      default=128)
   config = parser.parse_args()
 
+  x = np.random.rand(config.num_samples, 224, 224, 3).astype("f")
+  y = np.random.randint(config.num_classes, size=(config.num_samples))
+
+  with tf.device("/cpu:0"):
+    batch = net.input_fn(x, y, config.batch_size)
+
   with tf.device("/gpu:{}".format(config.device_id)):
-    image = tf.constant(1.0,
-                        shape=[config.batch_size, 224, 224, 3],
-                        dtype=tf.float32)
-    label = tf.constant(1,
-                        shape=[config.batch_size],
-                        dtype=tf.int32)
+    image = batch[0]
+    label = batch[1]
 
     outputs = net.simple_net(image, config.batch_size, config.num_classes)
 
@@ -76,12 +87,17 @@ def main():
     print("Warm up started.")
     for i_iter in range(config.num_warmup):
       sess.run(minimize_op)
+      # _image, _label = sess.run([image, label])
+      # print(_image.shape)
+      # sess.run(batch)
     print("Warm up finished.")
 
     start_time = time.time()
     for i_iter in range(config.num_iterations):
       print("\rIteration: " + str(i_iter), end="")
       sess.run(minimize_op)
+      # sess.run([image, label])
+      # sess.run(batch)
       sys.stdout.flush()
     end_time = time.time()
 

@@ -10,7 +10,11 @@ from __future__ import print_function
 import time
 import argparse
 import sys
-
+# By default CUDA guesses which device is fastest using a simple heuristic,
+# and make that device 0. This is difficult to debug. We use PCI_BUS_ID
+# instead to orders devices by PCI bus ID in ascending order.
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
 import tensorflow as tf
 
@@ -84,7 +88,7 @@ def main():
   parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-  parser.add_argument("--list_devices",
+  parser.add_argument("--device_list",
                       help="Comma seperatted device IDs to run benchmark on.",
                       type=str,
                       default="0")
@@ -106,15 +110,15 @@ def main():
                       default=200)
   config = parser.parse_args()
 
-  config.list_devices = list(map(int, config.list_devices.split(",")))
-  config.gpu_count = len(config.list_devices)
+  config.device_list = list(map(int, config.device_list.split(",")))
+  config.gpu_count = len(config.device_list)
 
   with tf.device("/cpu:0"):
 
     list_grads_and_vars = []
 
     # Map
-    for split_id, device_id in enumerate(config.list_devices):
+    for split_id, device_id in enumerate(config.device_list):
       with tf.device(assign_to_device("/gpu:{}".format(device_id),
                      ps_device="/cpu:0")):
 

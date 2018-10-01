@@ -1,12 +1,17 @@
 """
 Reference performance on 1080 TI
 
+
 """
 from __future__ import print_function
 import time
-import numpy as np
 import argparse
 import sys
+# By default CUDA guesses which device is fastest using a simple heuristic,
+# and make that device 0. This is difficult to debug. We use PCI_BUS_ID
+# instead to orders devices by PCI bus ID in ascending order.
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
 import tensorflow as tf
 
@@ -40,14 +45,13 @@ def main():
                       default=200)
   config = parser.parse_args()
 
-  x = np.random.rand(config.batch_size, 224, 224, 3)
-  y = np.random.randint(config.num_classes, size=(config.batch_size))
-
   with tf.device("/gpu:{}".format(config.device_id)):
-    image = tf.placeholder(
-      tf.float32, shape=(config.batch_size, 224, 224, 3))
-    label = tf.placeholder(
-      tf.int32, shape=(config.batch_size))
+    image = tf.constant(1.0,
+                        shape=[config.batch_size, 224, 224, 3],
+                        dtype=tf.float32)
+    label = tf.constant(1,
+                        shape=[config.batch_size],
+                        dtype=tf.int32)
 
     outputs = net.simple_net(image, config.batch_size, config.num_classes)
 
@@ -75,13 +79,15 @@ def main():
 
     print("Warm up started.")
     for i_iter in range(config.num_warmup):
-      sess.run(minimize_op, feed_dict={image: x, label: y})
+      sess.run(minimize_op)
+      # sess.run([image, label])
     print("Warm up finished.")
 
     start_time = time.time()
     for i_iter in range(config.num_iterations):
       print("\rIteration: " + str(i_iter), end="")
-      sess.run(minimize_op, feed_dict={image: x, label: y})
+      sess.run(minimize_op)
+      # sess.run([image, label])
       sys.stdout.flush()
     end_time = time.time()
 
