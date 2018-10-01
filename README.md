@@ -11,9 +11,6 @@ __benchmark_single_DATAOnGPU__
 
 ```
 python benchmark_single_DataOnGPU.py --device_id=0
-python benchmark_single_DataOnGPU.py --device_id=1
-python benchmark_single_DataOnGPU.py --device_id=2
-python benchmark_single_DataOnGPU.py --device_id=3
 ```
 
 
@@ -26,9 +23,6 @@ __benchmark_single_CPU2GPU__
 
 ```
 python benchmark_single_CPU2GPU.py --device_id=0
-python benchmark_single_CPU2GPU.py --device_id=1
-python benchmark_single_CPU2GPU.py --device_id=2
-python benchmark_single_CPU2GPU.py --device_id=3
 ```
 
 __benchmark_single_TFDataset__
@@ -40,9 +34,6 @@ __benchmark_single_TFDataset__
 
 ```
 python benchmark_single_TFDataset.py --device_id=0
-python benchmark_single_TFDataset.py --device_id=1
-python benchmark_single_TFDataset.py --device_id=2
-python benchmark_single_TFDataset.py --device_id=3
 ```
 
 __benchmark_ps_DATAOnGPU__
