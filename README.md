@@ -5,8 +5,8 @@ __benchmark_single_DATAOnGPU__
 
 | Operating System | 1080 TI x 1 |
 |-------|------------|
-| Windows 10 | |
-| Ubuntu 18.04 | |
+| Windows 10,  | |
+| Ubuntu 18.04 i9-7900x| 988 |
 
 
 ```
@@ -22,7 +22,7 @@ __benchmark_single_CPU2GPU__
 | Operating System | 1080 TI x 1 |
 |-------|------------|
 | Windows 10 | |
-| Ubuntu 18.04 | |
+| Ubuntu 18.04 i9-7900x| 560 |
 
 ```
 python benchmark_single_CPU2GPU.py --device_id=0
@@ -36,7 +36,7 @@ __benchmark_single_TFDataset__
 | Operating System | 1080 TI x 1 |
 |-------|------------|
 | Windows 10 | |
-| Ubuntu 18.04 | |
+| Ubuntu 18.04 i9-7900x| 800 |
 
 ```
 python benchmark_single_TFDataset.py --device_id=0
@@ -50,7 +50,7 @@ __benchmark_ps_DATAOnGPU__
 | Operating System | 1080 TI x 1 | 1080 TI x 2 | 1080 TI x 3 | 1080 TI x 4 |
 |-------|------------|------------|------------|------------|
 | Windows 10 | | | | |
-| Ubuntu 18.04 | | | | |
+| Ubuntu 18.04 i9-7900x| 950 | 1910 | 2800 | 3820 |
 
 ```
 python benchmark_ps_DataOnGPU.py --device_list=0
@@ -64,7 +64,7 @@ __benchmark_ps_CPU2GPU__
 | Operating System | 1080 TI x 1 | 1080 TI x 2 | 1080 TI x 3 | 1080 TI x 4 |
 |-------|------------|------------|------------|------------|
 | Windows 10 | | | | |
-| Ubuntu 18.04 | | | | |
+| Ubuntu 18.04 i9-7900x| 490 | 690 | 870 | 990 |
 
 ```
 python benchmark_ps_CPU2GPU.py --device_list=0
@@ -78,7 +78,7 @@ __benchmark_ps_TFDataset__
 | Operating System | 1080 TI x 1 | 1080 TI x 2 | 1080 TI x 3 | 1080 TI x 4 |
 |-------|------------|------------|------------|------------|
 | Windows 10 | | | | |
-| Ubuntu 18.04 | | | | |
+| Ubuntu 18.04 i9-7900x| 800 | 1450 | 1941 | 1950 |
 
 ```
 python benchmark_ps_TFDataset.py --device_list=0
