@@ -5,7 +5,7 @@ __benchmark_single_DATAOnGPU__
 
 | Operating System | 1080 TI x 1 |
 |-------|------------|
-| Windows 10,  | |
+| Windows 10, i7-6850| 950 |
 | Ubuntu 18.04 i9-7900x| 988 |
 
 
@@ -21,7 +21,7 @@ __benchmark_single_CPU2GPU__
 
 | Operating System | 1080 TI x 1 |
 |-------|------------|
-| Windows 10 | |
+| Windows 10 i7-6850| 533 |
 | Ubuntu 18.04 i9-7900x| 560 |
 
 ```
@@ -35,7 +35,7 @@ __benchmark_single_TFDataset__
 
 | Operating System | 1080 TI x 1 |
 |-------|------------|
-| Windows 10 | |
+| Windows 10, i7-6850| 730 |
 | Ubuntu 18.04 i9-7900x| 800 |
 
 ```
@@ -49,7 +49,7 @@ __benchmark_ps_DATAOnGPU__
 
 | Operating System | 1080 TI x 1 | 1080 TI x 2 | 1080 TI x 3 | 1080 TI x 4 |
 |-------|------------|------------|------------|------------|
-| Windows 10 | | | | |
+| Windows 10, i7-6850| 930 | 1882 | 2800 | |
 | Ubuntu 18.04 i9-7900x| 950 | 1910 | 2800 | 3820 |
 
 ```
@@ -63,7 +63,7 @@ __benchmark_ps_CPU2GPU__
 
 | Operating System | 1080 TI x 1 | 1080 TI x 2 | 1080 TI x 3 | 1080 TI x 4 |
 |-------|------------|------------|------------|------------|
-| Windows 10 | | | | |
+| Windows 10, i7-6850| 575 | 765 | 840 | |
 | Ubuntu 18.04 i9-7900x| 490 | 690 | 870 | 990 |
 
 ```
@@ -77,7 +77,7 @@ __benchmark_ps_TFDataset__
 
 | Operating System | 1080 TI x 1 | 1080 TI x 2 | 1080 TI x 3 | 1080 TI x 4 |
 |-------|------------|------------|------------|------------|
-| Windows 10 | | | | |
+| Windows 10, i7-6850| 790 | 975 | 1131 | |
 | Ubuntu 18.04 i9-7900x| 800 | 1450 | 1941 | 1950 |
 
 ```
